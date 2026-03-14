@@ -1,0 +1,16 @@
+@MusementApi_HostAddress = http://localhost:5124
+
+GET {{MusementApi_HostAddress}}/api/tours
+Accept: application/json
+
+###
+
+GET {{MusementApi_HostAddress}}/api/tours/filters
+Accept: application/json
+
+###
+
+GET {{MusementApi_HostAddress}}/api/tours/1
+Accept: application/json
+
+###

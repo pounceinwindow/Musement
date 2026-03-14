@@ -1,0 +1,633 @@
+namespace MusementApi.Data;
+
+public static class DataSeed
+{
+    private static readonly string[] CategoryTabs =
+    [
+        "Attractions & guided tours",
+        "Excursions & day trips",
+        "Activities",
+        "Experiences for locals",
+        "Tickets & events"
+    ];
+
+    private static readonly TicketOptionSeed[] TicketOptions =
+    [
+        new("instant", "Instant confirmation"),
+        new("free", "Free cancellation"),
+        new("guided", "Guided tour"),
+        new("skip", "Skip the line"),
+        new("fees", "Entrance fees included"),
+        new("privateTour", "Private Tour"),
+        new("meal", "Meal Included")
+    ];
+
+    private static readonly TourSeed[] Tours =
+    [
+        new(
+            1,
+            "entrance-ticket-to-chambord-castle",
+            "Entrance ticket to Chambord Castle",
+            "Book your skip-the-line ticket online to visit Chateau de Chambord, the largest Loire Valley castle inspired by Leonardo da Vinci.",
+            "/img/2.avif",
+            "Attractions & guided tours",
+            4.7,
+            107,
+            25,
+            "Flexible",
+            "en, it, fr, es, de, pt, ru, nl, ja, pl, zh, ko",
+            false,
+            ["Instant confirmation", "Skip the line", "Mobile ticket"],
+            [
+                "Visit one of the most iconic castles in the Loire Valley",
+                "Skip the line and start exploring immediately",
+                "Discover French Renaissance architecture up close"
+            ],
+            "<p>Book your skip-the-line ticket online to visit Chateau de Chambord, one of the most famous castles in France.</p>",
+            ["Skip-the-line entrance ticket"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Chateau de Chambord main entrance",
+            "41250 Chambord, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            2,
+            "chenonceau-castle-entrance-ticket",
+            "Chateau de Chenonceau entrance ticket",
+            "Enter the 'Ladies Castle' spanning the Cher River and explore its galleries, gardens, and iconic arches.",
+            "/img/3.avif",
+            "Tickets & events",
+            4.8,
+            214,
+            18,
+            "Flexible",
+            "en, it, fr, es, ar, de, pt, ru, nl, ja, pl, zh, ko, he",
+            false,
+            ["Instant confirmation", "Mobile ticket"],
+            [
+                "Walk through a castle built over a river",
+                "Stroll the famous formal gardens",
+                "Enjoy a flexible visit at your own pace"
+            ],
+            "<p>Discover Chateau de Chenonceau, one of the most romantic sites in the Loire Valley, with access to the Chateau and gardens.</p>",
+            ["Entrance ticket to Chateau de Chenonceau", "Access to the gardens"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Chateau de Chenonceau ticket entrance",
+            "37150 Chenonceaux, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            3,
+            "villandry-gardens-and-castle-ticket",
+            "Chateau de Villandry & gardens ticket",
+            "Visit Villandry and its world-famous Renaissance gardens with geometric patterns, fountains, and orchard terraces.",
+            "/img/4.avif",
+            "Attractions & guided tours",
+            4.6,
+            86,
+            14,
+            "Flexible",
+            "en, fr",
+            false,
+            ["Instant confirmation", "Mobile ticket"],
+            [
+                "Explore some of the most celebrated gardens in France",
+                "Perfect for photos and a relaxed afternoon",
+                "Combine Chateau rooms with outdoor terraces"
+            ],
+            "<p>Enjoy entry to Chateau de Villandry and discover its spectacular gardens, from the ornamental parterres to the vegetable garden.</p>",
+            ["Entrance ticket to Chateau de Villandry", "Access to the gardens"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Chateau de Villandry main entrance",
+            "37510 Villandry, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            4,
+            "amboise-royal-castle-skip-the-line-ticket",
+            "Royal Chateau of Amboise skip-the-line ticket",
+            "Skip the line and step into the royal residence overlooking the Loire, with panoramic terraces and historic chapels.",
+            "/img/5.avif",
+            "Tickets & events",
+            4.5,
+            73,
+            16,
+            "1 hour 30 minutes",
+            "en",
+            true,
+            ["Free cancellation", "Skip the line", "Mobile ticket"],
+            [
+                "Enjoy Loire views from the castle terraces",
+                "Fast access at peak times",
+                "See royal halls and a historic chapel"
+            ],
+            "<p>Visit the Royal Chateau of Amboise with skip-the-line entry and explore the residence of French kings in the heart of the Loire Valley.</p>",
+            ["Skip-the-line entrance ticket"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Royal Chateau of Amboise ticket line",
+            "37400 Amboise, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            5,
+            "clos-luce-leonardo-da-vinci-museum-ticket",
+            "Clos Luce: Leonardo da Vinci experience ticket",
+            "Explore Leonardo da Vinci's final residence and interactive exhibits dedicated to his inventions and art.",
+            "/img/6.avif",
+            "Attractions & guided tours",
+            4.7,
+            129,
+            19,
+            "2 hours",
+            "en",
+            true,
+            ["Free cancellation", "Mobile ticket"],
+            [
+                "Visit Leonardo da Vinci's last home in Amboise",
+                "Interactive models and outdoor installations",
+                "Great for families and curious minds"
+            ],
+            "<p>Discover the Clos Luce and dive into Leonardo da Vinci's world through exhibitions, models, and immersive displays.</p>",
+            ["Entrance ticket to Clos Luce"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Clos Luce entrance",
+            "2 Rue du Clos Luce, 37400 Amboise, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            6,
+            "loire-valley-castles-day-trip-from-tours",
+            "Loire Valley castles day trip from Tours",
+            "Spend the day exploring top Loire castles with comfortable transport and enough free time for photos and gardens.",
+            "/img/7.avif",
+            "Excursions & day trips",
+            4.6,
+            58,
+            89,
+            "9 hours",
+            "en",
+            true,
+            ["Free cancellation", "Small group", "Mobile ticket"],
+            [
+                "See multiple castles in one day",
+                "Relax with transport included",
+                "A classic Loire Valley introduction"
+            ],
+            "<p>Join a full-day excursion from Tours to discover the highlights of the Loire Valley, combining castles, viewpoints, and charming towns.</p>",
+            ["Transportation from Tours", "Driver/guide", "Free time at each stop"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Tours city center meeting point",
+            "Tours, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            7,
+            "loire-wine-tasting-vouvray-cellar",
+            "Vouvray cellar wine tasting",
+            "Taste crisp Loire whites in a traditional cellar and learn how local sparkling and still wines are made.",
+            "/img/8.avif",
+            "Experiences for locals",
+            4.8,
+            41,
+            22,
+            "1 hour 15 minutes",
+            "en",
+            true,
+            ["Free cancellation", "Mobile ticket"],
+            [
+                "Taste Vouvray wines in an atmospheric cellar",
+                "Learn simple tasting techniques",
+                "A relaxing experience near Tours"
+            ],
+            "<p>Enjoy a guided tasting in Vouvray and discover the character of Loire Valley wines through a curated flight of local selections.</p>",
+            ["Guided tasting", "Selection of wines"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Vouvray cellar entrance",
+            "Vouvray, 37210, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            8,
+            "loire-valley-hot-air-balloon-flight",
+            "Hot air balloon flight over the Loire Valley",
+            "Float above rivers, forests, and Chateau silhouettes during a scenic sunrise or sunset balloon flight.",
+            "/img/9.avif",
+            "Activities",
+            4.9,
+            33,
+            189,
+            "Flexible",
+            "en, it, fr, es, de, pt, ru, nl, zh",
+            false,
+            ["Instant confirmation", "Limited spots", "Mobile ticket"],
+            [
+                "Unforgettable aerial views of the Loire landscape",
+                "Perfect for special occasions",
+                "Includes a celebratory landing moment"
+            ],
+            "<p>Experience the Loire Valley from above on a hot air balloon flight, with stunning light and wide-open panoramas.</p>",
+            ["Balloon flight", "Safety briefing", "Landing celebration"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Balloon launch site (details after booking)",
+            "Loire Valley, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            9,
+            "loire-river-kayak-adventure",
+            "Loire River kayak adventure",
+            "Paddle a calm stretch of the Loire with a short briefing, then enjoy nature, islands, and riverside views.",
+            "/img/10.avif",
+            "Activities",
+            4.5,
+            27,
+            35,
+            "2 hours 30 minutes",
+            "en, fr",
+            true,
+            ["Free cancellation", "Family friendly", "Mobile ticket"],
+            [
+                "Easygoing paddling on France's iconic river",
+                "Great balance of activity and relaxation",
+                "See the Loire's wildlife up close"
+            ],
+            "<p>Enjoy a guided or self-guided kayaking outing on the Loire, with equipment and route instructions provided.</p>",
+            ["Kayak rental", "Paddle", "Life jacket", "Route briefing"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Riverside base (exact point after booking)",
+            "Tours area, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            10,
+            "tours-city-walking-tour-old-town",
+            "Tours Old Town guided walking tour",
+            "Discover the medieval streets, half-timbered houses, and lively squares of Tours with a local guide.",
+            "/img/11.avif",
+            "Attractions & guided tours",
+            4.6,
+            64,
+            15,
+            "2 hours",
+            "en, fr",
+            true,
+            ["Free cancellation", "Local guide", "Mobile ticket"],
+            [
+                "Learn the city's stories and hidden corners",
+                "Perfect introduction for first-time visitors",
+                "Great photo spots in the historic center"
+            ],
+            "<p>Join a guided walk through Tours to explore its heritage, architecture, and vibrant atmosphere in the heart of the Loire Valley.</p>",
+            ["Guided walking tour"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Place Plumereau",
+            "Place Plumereau, 37000 Tours, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            11,
+            "loire-valley-bike-tour-chateaux-and-vineyards",
+            "Loire Valley bike tour: Chateaux & vineyards",
+            "Cycle easy routes through vineyards and riverside paths, with stops for views and local tastings.",
+            "/img/12.avif",
+            "Activities",
+            4.7,
+            39,
+            59,
+            "4 hours",
+            "en, fr",
+            true,
+            ["Free cancellation", "E-bike option", "Mobile ticket"],
+            [
+                "Scenic cycling without tough climbs",
+                "Mix of nature, heritage, and local flavors",
+                "A fun way to explore beyond the city"
+            ],
+            "<p>Enjoy a bike tour in the Loire Valley combining riverside cycling, Chateau viewpoints, and optional tastings along the way.</p>",
+            ["Bike rental", "Helmet", "Route guidance"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Tours bike shop meeting point",
+            "Tours, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            12,
+            "loire-valley-cooking-class-french-pastries",
+            "French pastry cooking class in Tours",
+            "Bake classic French pastries with a chef and take home your creations - sweet, buttery, and very Loire.",
+            "/img/13.avif",
+            "Experiences for locals",
+            4.9,
+            22,
+            75,
+            "3 hours",
+            "en, fr",
+            true,
+            ["Free cancellation", "Instant confirmation", "Small group", "Mobile ticket"],
+            [
+                "Hands-on cooking with a local chef",
+                "Eat what you make (and bring some home)",
+                "A cozy indoor experience any season"
+            ],
+            "<p>Learn to make French pastries step-by-step in a friendly small-group class, with all ingredients and equipment provided.</p>",
+            ["Cooking lesson", "Ingredients", "Recipes", "Tasting"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Cooking studio in Tours (details after booking)",
+            "Tours, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            13,
+            "dinner-cruise-on-the-loire",
+            "Dinner cruise on the Loire River",
+            "Enjoy a relaxed evening cruise with a multi-course dinner and views of the riverbanks at golden hour.",
+            "/img/14.avif",
+            "Tickets & events",
+            4.4,
+            19,
+            69,
+            "2 hours 30 minutes",
+            "English, French",
+            true,
+            ["Romantic", "Instant confirmation", "Mobile ticket"],
+            [
+                "A special night on the Loire",
+                "Beautiful sunset views from the water",
+                "Comfortable seating and a calm pace"
+            ],
+            "<p>Sail the Loire on an evening cruise and enjoy a dinner experience designed to match the river's relaxed ambiance.</p>",
+            ["Cruise", "Dinner menu (set)", "Onboard seating"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Loire river dock (details after booking)",
+            "Tours area, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            14,
+            "chateau-de-cheverny-ticket-and-gardens",
+            "Chateau de Cheverny ticket & gardens",
+            "Visit Cheverny's elegant interiors and gardens - famous for its classic style and family-friendly atmosphere.",
+            "/img/15.avif",
+            "Attractions & guided tours",
+            4.5,
+            52,
+            13,
+            "1 hour 30 minutes",
+            "English, French",
+            true,
+            ["Mobile ticket", "Instant confirmation"],
+            [
+                "See beautifully preserved Chateau rooms",
+                "Enjoy landscaped gardens and shaded paths",
+                "A great stop between major Loire highlights"
+            ],
+            "<p>Discover Chateau de Cheverny with access to the interiors and gardens for a relaxed, self-paced visit.</p>",
+            ["Entrance ticket", "Access to gardens"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Chateau de Cheverny entrance",
+            "41700 Cheverny, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            15,
+            "loire-valley-private-transfer-tours-to-chambord",
+            "Private transfer: Tours to Chambord (one way)",
+            "A simple private ride from Tours to Chambord - ideal if you want flexibility without renting a car.",
+            "/img/16.avif",
+            "Excursions & day trips",
+            4.7,
+            12,
+            79,
+            "1 hour",
+            "English, French",
+            true,
+            ["Private", "Instant confirmation", "Mobile ticket"],
+            [
+                "Door-to-door convenience",
+                "Flexible timing for your day plan",
+                "Comfortable ride without logistics stress"
+            ],
+            "<p>Book a private one-way transfer between Tours and Chambord for a convenient, stress-free journey.</p>",
+            ["Private transfer", "Driver"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Pick-up in Tours (details after booking)",
+            "Tours, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            16,
+            "evening-wine-and-cheese-tasting-in-tours",
+            "Evening wine & cheese tasting in Tours",
+            "Taste Loire wines paired with regional cheeses in a relaxed setting, with stories and pairing tips.",
+            "/img/17.avif",
+            "Experiences for locals",
+            4.8,
+            34,
+            32,
+            "1 hour 30 minutes",
+            "English, French",
+            true,
+            ["Instant confirmation", "Mobile ticket"],
+            [
+                "Classic Loire pairings in one session",
+                "Easy, social evening activity",
+                "Learn pairings you can reuse anywhere"
+            ],
+            "<p>Enjoy a guided tasting of Loire wines paired with regional cheeses, with simple explanations and pairing notes.</p>",
+            ["Wine tasting", "Cheese pairing board", "Tasting notes"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Central Tours tasting room (details after booking)",
+            "37000 Tours, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            17,
+            "loire-valley-castles-day-trip-from-paris",
+            "Loire Valley castles day trip from Paris",
+            "An efficient day trip from Paris to the Loire Valley with transportation and curated stops at major chateaux.",
+            "/img/18.avif",
+            "Excursions & day trips",
+            4.5,
+            143,
+            129,
+            "13 hours",
+            "English, French",
+            true,
+            ["Day trip", "Instant confirmation", "Mobile ticket"],
+            [
+                "See the Loire in a single day from Paris",
+                "Transport included for a smooth experience",
+                "Balanced itinerary with guided context"
+            ],
+            "<p>Travel from Paris to the Loire Valley for a full-day itinerary featuring chateau highlights, scenic views, and free time to explore.</p>",
+            ["Round-trip transportation from Paris", "Tour escort"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Central Paris departure point (details after booking)",
+            "Paris, France",
+            "Free cancellation up to 24 hours before the experience starts."),
+        new(
+            18,
+            "loire-valley-photo-tour-sunrise-castle-views",
+            "Loire Valley photo tour: sunrise Chateau views",
+            "A guided morning photo walk to capture soft sunrise light, river reflections, and castle silhouettes.",
+            "/img/19.avif",
+            "Attractions & guided tours",
+            4.9,
+            15,
+            49,
+            "2 hours 30 minutes",
+            "English, French",
+            true,
+            ["Small group", "Mobile ticket", "Instant confirmation"],
+            [
+                "Golden-hour locations picked by a local guide",
+                "Great for phones or cameras",
+                "Take home a set of memorable shots"
+            ],
+            "<p>Join a sunrise photo tour in the Loire Valley with a guide who helps you find the best angles, light, and compositions.</p>",
+            ["Guided photo walk", "Location tips", "Basic composition guidance"],
+            "Bring a valid ID",
+            "Wear comfortable shoes",
+            "Meeting point shared after booking",
+            "Loire Valley, France",
+            "Free cancellation up to 24 hours before the experience starts.")
+    ];
+
+    public static object Data => new
+    {
+        Categories = CategoryTabs,
+        MinPrice = Tours.Min(x => x.PriceFrom),
+        MaxPrice = Tours.Max(x => x.PriceFrom),
+        Tours = Tours.Select(MapTour).ToArray()
+    };
+
+    public static object Filters => new
+    {
+        Tabs = CategoryTabs,
+        Price = new
+        {
+            Min = Tours.Min(x => x.PriceFrom),
+            Max = Tours.Max(x => x.PriceFrom)
+        },
+        Checkboxes = new object[]
+        {
+            new
+            {
+                Key = "tickets",
+                Label = "Tickets option",
+                Items = TicketOptions.Select(option => new
+                {
+                    option.Name,
+                    option.Label,
+                    Count = Tours.Count(tour => MatchesTicketOption(tour, option.Name))
+                }).ToArray()
+            },
+            new
+            {
+                Key = "categories",
+                Label = "Categories",
+                Items = CategoryTabs.Select(category => new
+                {
+                    Name = category,
+                    Label = category,
+                    Count = Tours.Count(tour => tour.Category == category)
+                }).ToArray()
+            }
+        }
+    };
+
+    public static object? GetTourById(int id)
+    {
+        var tour = Tours.FirstOrDefault(x => x.Id == id);
+        return tour is null ? null : MapTour(tour);
+    }
+
+    private static bool MatchesTicketOption(TourSeed tour, string optionName)
+    {
+        return optionName switch
+        {
+            "instant" => HasChip(tour, "Instant confirmation"),
+            "free" => tour.FreeCancellation,
+            "guided" => ContainsTourValue(tour, "guided", "guide", "local guide"),
+            "skip" => HasChip(tour, "Skip the line"),
+            "fees" => ContainsTourValue(tour, "entrance", "ticket", "access"),
+            "privateTour" => ContainsTourValue(tour, "private"),
+            "meal" => ContainsTourValue(tour, "dinner", "meal"),
+            _ => false
+        };
+    }
+
+    private static bool HasChip(TourSeed tour, string chip)
+    {
+        return tour.Chips.Any(x => string.Equals(x, chip, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool ContainsTourValue(TourSeed tour, params string[] terms)
+    {
+        return MatchesAny(tour.Title, terms) ||
+               MatchesAny(tour.Description, terms) ||
+               MatchesAny(tour.DescriptionHtml, terms) ||
+               tour.Chips.Any(chip => MatchesAny(chip, terms)) ||
+               tour.Included.Any(item => MatchesAny(item, terms));
+    }
+
+    private static bool MatchesAny(string value, IEnumerable<string> terms)
+    {
+        return terms.Any(term => value.Contains(term, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static object MapTour(TourSeed tour)
+    {
+        return new
+        {
+            tour.Id,
+            tour.Slug,
+            tour.Title,
+            tour.Description,
+            tour.HeroUrl,
+            tour.Category,
+            tour.Rating,
+            tour.ReviewsCount,
+            tour.PriceFrom,
+            tour.Duration,
+            tour.Languages,
+            tour.Love,
+            tour.DescriptionHtml,
+            Price = $"${tour.PriceFrom:F2}",
+            tour.FreeCancellation,
+            tour.Chips,
+            tour.Included,
+            Remember = new[] { tour.RememberFirst, tour.RememberSecond },
+            tour.Meeting,
+            tour.Address,
+            tour.CancelPolicy,
+            Reviews = Array.Empty<object>()
+        };
+    }
+
+    private sealed record TourSeed(
+        int Id,
+        string Slug,
+        string Title,
+        string Description,
+        string HeroUrl,
+        string Category,
+        double Rating,
+        int ReviewsCount,
+        decimal PriceFrom,
+        string Duration,
+        string Languages,
+        bool FreeCancellation,
+        string[] Chips,
+        string[] Love,
+        string DescriptionHtml,
+        string[] Included,
+        string RememberFirst,
+        string RememberSecond,
+        string Meeting,
+        string Address,
+        string CancelPolicy);
+
+    private sealed record TicketOptionSeed(string Name, string Label);
+}

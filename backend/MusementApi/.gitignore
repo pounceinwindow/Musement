@@ -1,0 +1,28 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# IDE and editor folders
+.idea/
+.vs/
+.vscode/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs and test results
+*.log
+[Tt]est[Rr]esult*/
+[Bb]enchmarkDotNet.Artifacts/
+
+# Package artifacts
+*.nupkg
+*.snupkg
+
+# Local environment overrides
+appsettings.Local.json
+appsettings.*.local.json
