@@ -1,0 +1,232 @@
+.card {
+    position: sticky;
+    top: 18px;
+    align-self: start;
+    border: 2px solid #d1d5db;
+    border-radius: 16px;
+    padding: 18px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+}
+
+.title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.valueBadge {
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #fc6c4f;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.section {
+    margin-top: 16px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.dateField {
+    position: relative;
+    height: 48px;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    background: #fff;
+    color: #374151;
+}
+
+.dateValue {
+    flex: 1;
+    font-weight: 500;
+}
+
+.nativeDate {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.offerCard {
+    margin-top: 16px;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 14px;
+    background: #fff;
+}
+
+.radioRow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #111827;
+    font-weight: 700;
+    letter-spacing: .05em;
+    font-size: 12px;
+}
+
+.radioRow input {
+    width: 16px;
+    height: 16px;
+    accent-color: #0f172a;
+}
+
+.timeRow {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #374151;
+    font-size: 14px;
+}
+
+.ticketHeading {
+    margin-top: 16px;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ticketList {
+    margin-top: 10px;
+    display: grid;
+    gap: 12px;
+}
+
+.ticketRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.ticketInfo {
+    min-width: 0;
+}
+
+.ticketLabel {
+    font-size: 14px;
+    color: #111827;
+}
+
+.ticketPrice {
+    margin-top: 3px;
+    font-size: 16px;
+    color: #1e3a8a;
+    font-weight: 700;
+}
+
+.stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 2px solid #cbd5e1;
+    border-radius: 0;
+    overflow: hidden;
+    background: #fff;
+}
+
+.stepperBtn {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    background: #fff;
+    color: #6b7280;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.stepperBtn:disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.stepperBtnPlus {
+    background: #f8fafc;
+    color: #111827;
+    border-left: 2px solid #cbd5e1;
+}
+
+.qty {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-left: 2px solid #cbd5e1;
+    color: #111827;
+    font-weight: 700;
+}
+
+.totalRow {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+    color: #111827;
+}
+
+.totalValue {
+    color: #1e3a8a;
+}
+
+.actions {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.secondaryBtn,
+.primaryBtn {
+    height: 42px;
+    border-radius: 8px;
+    font-weight: 700;
+    border: 2px solid #cbd5e1;
+    cursor: pointer;
+}
+
+.secondaryBtn {
+    background: #fff;
+    color: #111827;
+}
+
+.primaryBtn {
+    background: #fc6c4f;
+    color: #fff;
+    border-color: #fc6c4f;
+}
+
+.secondaryBtn:disabled,
+.primaryBtn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    display: block;
+    fill: currentColor;
+}

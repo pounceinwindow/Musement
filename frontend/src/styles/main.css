@@ -1,0 +1,66 @@
+:root {
+    --ink: #1a1a2e;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --line-2: #717171;
+    --chip: #f3f4f6;
+    --brand: #fc6c4f;
+    --ok: #10b981;
+    --price: #1a1a2e;
+    --shadow: 0 6px 24px rgba(17, 24, 39, .08);
+    --radius: 16px;
+    --container: 100%;
+    --accent: #7aadc9;
+    --focus: 2px solid #1a1a2e;
+    --page-max: 100%;
+    --hero-max: 1240px;
+    --gutter: 20px;
+    --sidebar-w: 340px;
+    --card-radius: 14px;
+    --card-gap: 20px;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #fff;
+    line-height: 1.4;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button, input, select {
+    font: inherit;
+}
+
+:focus-visible {
+    outline: var(--focus);
+    outline-offset: 2px;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+}

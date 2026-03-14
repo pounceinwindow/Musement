@@ -1,0 +1,42 @@
+.toursPage {
+    max-width: none;
+    width: 100%;
+    margin: 0 auto;
+    padding: 18px 76px;
+}
+
+.toursGrid {
+    display: grid;
+    grid-template-columns: 391px minmax(0, 1fr);
+    column-gap: 76px;
+    align-items: start;
+    margin-top: 10px;
+}
+
+.resultsArea {
+    background: #fafafa;
+}
+
+@media (max-width: 1300px) {
+    .toursPage {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .toursGrid {
+        grid-template-columns: 320px minmax(0, 1fr);
+        column-gap: 28px;
+    }
+}
+
+@media (max-width: 900px) {
+    .toursPage {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .toursGrid {
+        grid-template-columns: 1fr;
+        column-gap: 0;
+    }
+}

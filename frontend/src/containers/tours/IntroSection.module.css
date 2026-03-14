@@ -1,0 +1,47 @@
+.section {
+    margin: 48px 0;
+}
+
+.intro {
+    color: #374151;
+    line-height: 1.6;
+}
+
+.heading {
+    font-size: 22px;
+    margin: 0 0 12px 0;
+}
+
+.columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 12px;
+}
+
+.col h4 {
+    margin: 0 0 8px 0;
+}
+
+.item {
+    margin-top: 0;
+}
+
+.col .offsetHeading {
+    margin-top: 16px;
+}
+
+.col a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line);
+    padding: 10px 0;
+    color: #374151;
+}
+
+@media (max-width: 600px) {
+    .columns {
+        grid-template-columns: 1fr;
+    }
+}

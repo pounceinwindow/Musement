@@ -1,0 +1,49 @@
+.tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: 10px 0 14px;
+}
+
+.tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 12px;
+    background: #fff;
+    color: #111827;
+    border: 1px solid rgba(0, 0, 0, .2);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.2s ease;
+    font: inherit;
+}
+
+.tab svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.tab:hover {
+    background: var(--chip);
+}
+
+.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.active svg {
+    fill: #fff;
+}
+
+.active:hover {
+    background: var(--accent);
+}

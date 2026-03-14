@@ -1,0 +1,31 @@
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 6px 0 12px;
+}
+
+.sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 8px 12px;
+    background: #fff;
+    color: #374151;
+}
+
+.sort label {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.sort select {
+    border: none;
+    background: transparent;
+    font: inherit;
+    padding: 0;
+    outline: none;
+    cursor: pointer;
+}
