@@ -1,27 +1,5 @@
-import {useMemo, useState} from 'react';
-import {MAX_PRICE, MIN_PRICE, TOURS} from '../data/tours';
-
-const TICKET_FILTER_RULES = {
-    instant: (tour) => hasChip(tour, 'instant confirmation'),
-    guided: (tour) => hasChip(tour, 'guided tour'),
-    skip: (tour) => hasChip(tour, 'skip the line'),
-    fees: (tour) => hasChip(tour, 'entrance fees included'),
-    privateTour: (tour) => hasChip(tour, 'private tour'),
-    meal: (tour) => hasChip(tour, 'meal included'),
-};
-
-const DEFAULT_FILTERS = {
-    priceMin: MIN_PRICE,
-    priceMax: MAX_PRICE,
-    instant: false,
-    free: false,
-    guided: false,
-    skip: false,
-    fees: false,
-    privateTour: false,
-    meal: false,
-    selectedCategories: [],
-};
+import {startTransition, useEffect, useMemo, useState} from 'react';
+import {fetchTours} from '../api/tours';
 
 const SORTERS = {
     popularity: (a, b) => b.reviewsCount - a.reviewsCount,
@@ -30,68 +8,176 @@ const SORTERS = {
     price_desc: (a, b) => b.priceFrom - a.priceFrom,
 };
 
+const EMPTY_SELECTION = {
+    options: {},
+    ranges: {},
+    toggles: {},
+};
+
 function useFilters() {
-    const [filters, setFilters] = useState(DEFAULT_FILTERS);
-
-    const [activeCategory, setActiveCategory] = useState(null);
+    const [selection, setSelection] = useState(EMPTY_SELECTION);
+    const [payload, setPayload] = useState(null);
     const [sort, setSort] = useState('popularity');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    const updateFilters = (patch) => {
-        setFilters((prev) => ({...prev, ...patch}));
-    };
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadTours() {
+            setLoading(true);
+            setError('');
+
+            try {
+                const response = await fetchTours(buildQueryParams(selection));
+                if (!cancelled) {
+                    setPayload(response);
+                }
+            } catch (loadError) {
+                if (!cancelled) {
+                    setError(loadError.message || 'Failed to load tours.');
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadTours();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [selection]);
+
+    const filterItems = payload?.filters?.items ?? [];
+    const categoryFilter = filterItems.find((item) => item.type === 'tabs') ?? null;
+    const sidebarFilters = filterItems.filter((item) => item.type !== 'tabs');
+    const tours = payload?.tours ?? [];
+    const totalCount = payload?.totalCount ?? tours.length;
 
     const filteredTours = useMemo(() => {
-        const visibleTours = TOURS.filter((tour) => matchesFilters(tour, filters, activeCategory));
         const sorter = SORTERS[sort] ?? SORTERS.popularity;
-        return [...visibleTours].sort(sorter);
-    }, [filters, activeCategory, sort]);
+        return [...tours].sort(sorter);
+    }, [sort, tours]);
+
+    const activeCategory = categoryFilter?.selectedValues?.[0] ?? null;
+
+    const setActiveCategory = (category) => {
+        startTransition(() => {
+            setSelection((prev) => ({
+                ...prev,
+                options: {
+                    ...prev.options,
+                    category: category ? [category] : [],
+                },
+            }));
+        });
+    };
+
+    const toggleOption = (group, optionName, checked) => {
+        startTransition(() => {
+            setSelection((prev) => {
+                const currentValues = prev.options[group.key] ?? [];
+                const nextValues = group.multi
+                    ? checked
+                        ? [...currentValues, optionName]
+                        : currentValues.filter((value) => value !== optionName)
+                    : checked
+                        ? [optionName]
+                        : [];
+
+                return {
+                    ...prev,
+                    options: {
+                        ...prev.options,
+                        [group.key]: Array.from(new Set(nextValues)),
+                    },
+                };
+            });
+        });
+    };
+
+    const updateRange = (range, nextMin, nextMax) => {
+        startTransition(() => {
+            setSelection((prev) => ({
+                ...prev,
+                ranges: {
+                    ...prev.ranges,
+                    [range.key]: {
+                        min: nextMin,
+                        max: nextMax,
+                        minQueryKey: range.minQueryKey,
+                        maxQueryKey: range.maxQueryKey,
+                    },
+                },
+            }));
+        });
+    };
+
+    const toggleFlag = (toggle, checked) => {
+        startTransition(() => {
+            setSelection((prev) => ({
+                ...prev,
+                toggles: {
+                    ...prev.toggles,
+                    [toggle.key]: checked,
+                },
+            }));
+        });
+    };
 
     return {
-        filters,
-        updateFilters,
         activeCategory,
-        setActiveCategory,
-        sort,
-        setSort,
+        categoryFilter,
+        error,
         filteredTours,
+        filterItems,
+        loading,
+        setActiveCategory,
+        setSort,
+        sidebarFilters,
+        sort,
+        toggleFlag,
+        toggleOption,
+        totalCount,
+        updateRange,
     };
 }
 
-function matchesFilters(tour, filters, activeCategory) {
-    return (
-        isInPriceRange(tour, filters) &&
-        matchesFreeCancellation(tour, filters) &&
-        matchesSelectedCategories(tour, filters) &&
-        matchesActiveCategory(tour, activeCategory) &&
-        matchesTicketOptions(tour, filters)
-    );
-}
+function buildQueryParams(selection) {
+    const params = new URLSearchParams();
 
-function isInPriceRange(tour, filters) {
-    return tour.priceFrom >= filters.priceMin && tour.priceFrom <= filters.priceMax;
-}
+    for (const [key, values] of Object.entries(selection.options)) {
+        if (!Array.isArray(values) || values.length === 0) {
+            continue;
+        }
 
-function matchesFreeCancellation(tour, filters) {
-    return !filters.free || tour.freeCancellation;
-}
+        params.set(key, values.join(','));
+    }
 
-function matchesSelectedCategories(tour, filters) {
-    return (
-        filters.selectedCategories.length === 0 ||
-        filters.selectedCategories.includes(tour.category)
-    );
-}
+    for (const range of Object.values(selection.ranges)) {
+        if (!range) {
+            continue;
+        }
 
-function matchesActiveCategory(tour, activeCategory) {
-    return !activeCategory || tour.category === activeCategory;
-}
+        if (range.min !== undefined && range.min !== null) {
+            params.set(range.minQueryKey, String(range.min));
+        }
 
-function matchesTicketOptions(tour, filters) {
-    return !Object.entries(TICKET_FILTER_RULES).some(([key, rule]) => filters[key] && !rule(tour));
-}
+        if (range.max !== undefined && range.max !== null) {
+            params.set(range.maxQueryKey, String(range.max));
+        }
+    }
 
-function hasChip(tour, chipName) {
-    return tour.chips.some((chip) => chip.toLowerCase() === chipName);
+    for (const [key, checked] of Object.entries(selection.toggles)) {
+        if (checked) {
+            params.set(key, 'true');
+        }
+    }
+
+    return params;
 }
 
 export default useFilters;

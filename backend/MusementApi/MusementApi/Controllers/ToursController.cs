@@ -10,13 +10,13 @@ public class ToursController : ControllerBase
     [HttpGet]
     public ActionResult<object> GetTours()
     {
-        return Ok(DataSeed.Data);
+        return Ok(DataSeed.GetTours(Request.Query));
     }
 
     [HttpGet("filters")]
     public ActionResult<object> GetFilters()
     {
-        return Ok(DataSeed.Filters);
+        return Ok(DataSeed.GetFilters(Request.Query));
     }
 
     [HttpGet("{id:int}")]
@@ -31,3 +31,4 @@ public class ToursController : ControllerBase
         return Ok(tour);
     }
 }
+    

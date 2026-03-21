@@ -1,165 +1,175 @@
-import {useMemo, useState} from 'react';
-import {MAX_PRICE, MIN_PRICE} from '../../data/tours';
+import {useEffect, useMemo, useState} from 'react';
 import s from './FilterSidebar.module.css';
 
-function FilterSidebar({filters, categories, onFilterChange}) {
-    const [priceOpen, setPriceOpen] = useState(false);
-    const [ticketsOpen, setTicketsOpen] = useState(false);
-    const [categoriesOpen, setCategoriesOpen] = useState(false);
+function FilterSidebar({filters, loading, onOptionChange, onRangeChange, onToggleChange}) {
+    const [openSections, setOpenSections] = useState({});
+
+    useEffect(() => {
+        setOpenSections((prev) => {
+            const next = {...prev};
+
+            for (const filter of filters) {
+                if (!(filter.key in next)) {
+                    next[filter.key] = true;
+                }
+            }
+
+            return next;
+        });
+    }, [filters]);
 
     return (
         <aside aria-label="Filters" className={s.aside}>
-            <form className={s.filters} onSubmit={(e) => e.preventDefault()}>
-                <PriceFilter
-                    priceMin={filters.priceMin}
-                    priceMax={filters.priceMax}
-                    onChange={onFilterChange}
-                    isOpen={priceOpen}
-                    onToggle={() => setPriceOpen((prev) => !prev)}
-                />
+            <form className={s.filters} onSubmit={(event) => event.preventDefault()}>
+                {loading && filters.length === 0 ? <p>Loading filters...</p> : null}
 
-                <div className={`${s.group} ${ticketsOpen ? '' : s.collapsed}`}>
-                    <button
-                        aria-expanded={ticketsOpen}
-                        className={s.heading}
-                        type="button"
-                        onClick={() => setTicketsOpen((prev) => !prev)}
-                    >
-                        Tickets option
-                    </button>
-                    {ticketsOpen && (
-                        <div className={s.checks}>
-                            {TICKET_OPTIONS.map((opt) => (
-                                <label className={s.check} key={opt.name}>
-                                    <input
-                                        type="checkbox"
-                                        checked={filters[opt.name] || false}
-                                        onChange={(e) => onFilterChange({[opt.name]: e.target.checked})}
-                                    />
-                                    {opt.label}
-                                </label>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className={`${s.group} ${categoriesOpen ? '' : s.collapsed}`}>
-                    <button
-                        aria-expanded={categoriesOpen}
-                        className={s.heading}
-                        type="button"
-                        onClick={() => setCategoriesOpen((prev) => !prev)}
-                    >
-                        Categories
-                    </button>
-                    {categoriesOpen && (
-                        <div className={s.checks}>
-                            {categories.map((cat) => (
-                                <label className={s.check} key={cat}>
-                                    <input
-                                        type="checkbox"
-                                        checked={filters.selectedCategories.includes(cat)}
-                                        onChange={(e) => {
-                                            const next = e.target.checked
-                                                ? [...filters.selectedCategories, cat]
-                                                : filters.selectedCategories.filter((c) => c !== cat);
-                                            onFilterChange({selectedCategories: next});
-                                        }}
-                                    />
-                                    {cat}
-                                </label>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                {filters.map((filter) => (
+                    <FilterGroup
+                        key={filter.key}
+                        filter={filter}
+                        isOpen={openSections[filter.key] ?? true}
+                        onOptionChange={onOptionChange}
+                        onRangeChange={onRangeChange}
+                        onToggleChange={onToggleChange}
+                        onToggleOpen={() =>
+                            setOpenSections((prev) => ({
+                                ...prev,
+                                [filter.key]: !prev[filter.key],
+                            }))
+                        }
+                    />
+                ))}
             </form>
         </aside>
     );
 }
 
-const TICKET_OPTIONS = [
-    {name: 'instant', label: 'Instant confirmation'},
-    {name: 'free', label: 'Free cancellation'},
-    {name: 'guided', label: 'Guided tour'},
-    {name: 'skip', label: 'Skip the line'},
-    {name: 'fees', label: 'Entrance fees included'},
-    {name: 'privateTour', label: 'Private Tour'},
-    {name: 'meal', label: 'Meal Included'},
-];
-
-function PriceFilter({priceMin, priceMax, onChange, isOpen, onToggle}) {
-    const fillStyle = useMemo(() => {
-        const range = MAX_PRICE - MIN_PRICE;
-        if (range <= 0) {
-            return {left: '0%', width: '0%'};
-        }
-
-        const left = ((priceMin - MIN_PRICE) / range) * 100;
-        const width = ((priceMax - MIN_PRICE) / range) * 100 - left;
-        return {left: `${left}%`, width: `${width}%`};
-    }, [priceMin, priceMax]);
-
-    const handleMin = (e) => {
-        const val = Number(e.target.value);
-        if (val < priceMax) {
-            onChange({priceMin: val});
-        }
-    };
-
-    const handleMax = (e) => {
-        const val = Number(e.target.value);
-        if (val > priceMin) {
-            onChange({priceMax: val});
-        }
-    };
-
+function FilterGroup({filter, isOpen, onOptionChange, onRangeChange, onToggleChange, onToggleOpen}) {
     return (
         <div className={`${s.group} ${isOpen ? '' : s.collapsed}`}>
             <button
                 aria-expanded={isOpen}
                 className={s.heading}
                 type="button"
-                onClick={onToggle}
+                onClick={onToggleOpen}
             >
-                Price (per adult)
+                {filter.label}
             </button>
-            {isOpen && (
-                <>
-                    <div aria-label="Price range" className={s.range}>
-                        <div aria-hidden="true" className={s.track}/>
-                        <div aria-hidden="true" className={s.fill} style={fillStyle}/>
-                        <input
-                            type="range"
-                            min={MIN_PRICE}
-                            max={MAX_PRICE}
-                            step={1}
-                            value={priceMin}
-                            style={{zIndex: priceMin > MAX_PRICE - 50 ? 5 : 3}}
-                            onChange={handleMin}
-                        />
-                        <input
-                            type="range"
-                            min={MIN_PRICE}
-                            max={MAX_PRICE}
-                            step={1}
-                            value={priceMax}
-                            onChange={handleMax}
-                        />
-                    </div>
-                    <div aria-hidden="true" className={s.minMax}>
-                        <div className={s.box}>
-                            <span>Min:</span>
-                            <strong>${priceMin}</strong>
-                        </div>
-                        <div className={s.box}>
-                            <span>Max:</span>
-                            <strong>${priceMax}</strong>
-                        </div>
-                    </div>
-                </>
-            )}
+
+            {isOpen ? <FilterContent filter={filter} onOptionChange={onOptionChange} onRangeChange={onRangeChange} onToggleChange={onToggleChange}/> : null}
         </div>
     );
+}
+
+function FilterContent({filter, onOptionChange, onRangeChange, onToggleChange}) {
+    if (filter.type === 'checkboxes') {
+        return (
+            <div className={s.checks}>
+                {filter.items.map((option) => (
+                    <label className={s.check} key={option.name}>
+                        <input
+                            type="checkbox"
+                            checked={option.selected}
+                            disabled={option.count === 0 && !option.selected}
+                            onChange={(event) => onOptionChange(filter, option.name, event.target.checked)}
+                        />
+                        {option.label} ({option.count})
+                    </label>
+                ))}
+            </div>
+        );
+    }
+
+    if (filter.type === 'toggle') {
+        return (
+            <div className={s.checks}>
+                <label className={s.check}>
+                    <input
+                        type="checkbox"
+                        checked={filter.selected}
+                        disabled={filter.count === 0 && !filter.selected}
+                        onChange={(event) => onToggleChange(filter, event.target.checked)}
+                    />
+                    {filter.label} ({filter.count})
+                </label>
+            </div>
+        );
+    }
+
+    if (filter.type === 'range') {
+        return <RangeFilter filter={filter} onChange={onRangeChange}/>;
+    }
+
+    return null;
+}
+
+function RangeFilter({filter, onChange}) {
+    const minValue = filter.selectedMin ?? filter.min;
+    const maxValue = filter.selectedMax ?? filter.max;
+
+    const fillStyle = useMemo(() => {
+        const range = filter.max - filter.min;
+        if (range <= 0) {
+            return {left: '0%', width: '0%'};
+        }
+
+        const left = ((minValue - filter.min) / range) * 100;
+        const width = ((maxValue - filter.min) / range) * 100 - left;
+        return {left: `${left}%`, width: `${width}%`};
+    }, [filter.max, filter.min, maxValue, minValue]);
+
+    const handleMin = (event) => {
+        const nextValue = Number(event.target.value);
+        onChange(filter, Math.min(nextValue, maxValue), maxValue);
+    };
+
+    const handleMax = (event) => {
+        const nextValue = Number(event.target.value);
+        onChange(filter, minValue, Math.max(nextValue, minValue));
+    };
+
+    return (
+        <>
+            <div aria-label={`${filter.label} range`} className={s.range}>
+                <div aria-hidden="true" className={s.track}/>
+                <div aria-hidden="true" className={s.fill} style={fillStyle}/>
+                <input
+                    type="range"
+                    min={filter.min}
+                    max={filter.max}
+                    step={filter.step}
+                    value={minValue}
+                    onChange={handleMin}
+                />
+                <input
+                    type="range"
+                    min={filter.min}
+                    max={filter.max}
+                    step={filter.step}
+                    value={maxValue}
+                    onChange={handleMax}
+                />
+            </div>
+            <div aria-hidden="true" className={s.minMax}>
+                <div className={s.box}>
+                    <span>Min:</span>
+                    <strong>{formatRangeValue(minValue, filter.format)}</strong>
+                </div>
+                <div className={s.box}>
+                    <span>Max:</span>
+                    <strong>{formatRangeValue(maxValue, filter.format)}</strong>
+                </div>
+            </div>
+        </>
+    );
+}
+
+function formatRangeValue(value, format) {
+    if (format === 'rating') {
+        return value.toFixed(1);
+    }
+
+    return `$${Number(value).toFixed(0)}`;
 }
 
 export default FilterSidebar;

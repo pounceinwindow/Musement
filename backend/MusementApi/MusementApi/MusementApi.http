@@ -5,7 +5,17 @@ Accept: application/json
 
 ###
 
+GET {{MusementApi_HostAddress}}/api/tours?category=Activities&tickets=guided,meal&minPrice=20&maxPrice=80&minRating=4.6&freeCancellation=true
+Accept: application/json
+
+###
+
 GET {{MusementApi_HostAddress}}/api/tours/filters
+Accept: application/json
+
+###
+
+GET {{MusementApi_HostAddress}}/api/tours/filters?category=Activities&tickets=guided&maxPrice=80&freeCancellation=true
 Accept: application/json
 
 ###

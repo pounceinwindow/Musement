@@ -6,18 +6,23 @@ import TourGrid from '../components/TourGrid';
 import IntroSection from '../containers/tours/IntroSection';
 import CitySection from '../containers/tours/CitySection';
 import useFilters from '../hooks/useFilters';
-import {CATEGORIES} from '../data/tours';
 import s from './ToursPage.module.css';
 
 function ToursPage() {
     const {
-        filters,
-        updateFilters,
         activeCategory,
+        categoryFilter,
+        error,
+        filteredTours,
+        loading,
         setActiveCategory,
         sort,
         setSort,
-        filteredTours,
+        sidebarFilters,
+        toggleFlag,
+        toggleOption,
+        totalCount,
+        updateRange,
     } = useFilters();
 
     return (
@@ -27,25 +32,29 @@ function ToursPage() {
             <main className={s.toursPage} role="main">
                 <div className={s.toursGrid}>
                     <FilterSidebar
-                        filters={filters}
-                        categories={CATEGORIES}
-                        onFilterChange={updateFilters}
+                        filters={sidebarFilters}
+                        loading={loading}
+                        onRangeChange={updateRange}
+                        onToggleChange={toggleFlag}
+                        onOptionChange={toggleOption}
                     />
 
                     <section aria-label="Results" className={s.resultsArea}>
                         <CategoryTabs
-                            categories={CATEGORIES}
+                            categoryFilter={categoryFilter}
                             activeCategory={activeCategory}
                             onSelect={setActiveCategory}
                         />
 
                         <SortBar
-                            totalCount={filteredTours.length}
+                            totalCount={totalCount}
                             sort={sort}
                             onSortChange={setSort}
                         />
 
-                        <TourGrid tours={filteredTours}/>
+                        {error ? <p>{error}</p> : null}
+                        {!error && loading ? <p>Loading tours...</p> : null}
+                        {!error && !loading ? <TourGrid tours={filteredTours}/> : null}
                     </section>
                 </div>
 

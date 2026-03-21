@@ -1,6 +1,6 @@
+import {useEffect, useMemo, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
-import {useMemo} from 'react';
-import {TOURS} from '../data/tours';
+import {fetchTourById, fetchTours} from '../api/tours';
 import AvailabilityAndPricesCard from '../containers/tour-detail/AvailabilityAndPricesCard';
 import ReviewsSection from '../containers/tour-detail/ReviewsSection';
 import RelatedToursSection from '../containers/tour-detail/RelatedToursSection';
@@ -8,24 +8,69 @@ import s from './TourDetailPage.module.css';
 
 function TourDetailPage() {
     const {id} = useParams();
-    const tour = TOURS.find((t) => t.id === Number(id));
+    const [tour, setTour] = useState(null);
+    const [relatedTours, setRelatedTours] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    if (!tour) {
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadTourPage() {
+            setLoading(true);
+            setError('');
+
+            try {
+                const [tourResponse, toursResponse] = await Promise.all([
+                    fetchTourById(id),
+                    fetchTours(),
+                ]);
+
+                if (cancelled) {
+                    return;
+                }
+
+                setTour(tourResponse);
+                setRelatedTours(shuffle(toursResponse.tours.filter((item) => item.id !== tourResponse.id)).slice(0, 4));
+            } catch (loadError) {
+                if (!cancelled) {
+                    setError(loadError.message || 'Failed to load tour.');
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadTourPage();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [id]);
+
+    const scoreLabel = useMemo(() => (tour ? getRatingLabel(tour.rating) : ''), [tour]);
+
+    if (loading) {
+        return (
+            <div className={`${s.container} ${s.notFound}`}>
+                <h1>Loading tour...</h1>
+            </div>
+        );
+    }
+
+    if (error || !tour) {
         return (
             <div className={`${s.container} ${s.notFound}`}>
                 <h1>Tour not found</h1>
-                <p>The tour you are looking for does not exist.</p>
+                <p>{error || 'The tour you are looking for does not exist.'}</p>
                 <Link to="/tours" className={s.backLink}>
                     Back to tours
                 </Link>
             </div>
         );
     }
-
-    const relatedTours = useMemo(() => {
-        if (!tour) return [];
-        return shuffle(TOURS.filter((t) => t.id !== tour.id)).slice(0, 4);
-    }, [tour]);
 
     return (
         <div className={s.page}>
@@ -54,9 +99,7 @@ function TourDetailPage() {
 
                         <div className={s.rating}>
                             <div className={s.badge}>{tour.rating}</div>
-                            <div className={s.scoreText}>
-                                {tour.rating >= 4.5 ? 'Excellent' : tour.rating >= 4 ? 'Very good' : 'Good'}
-                            </div>
+                            <div className={s.scoreText}>{scoreLabel}</div>
                             <a href="#reviews">Based on {tour.reviewsCount} reviews</a>
                         </div>
 
@@ -96,13 +139,13 @@ function TourDetailPage() {
                         <section>
                             <h2>Why you&apos;ll love this</h2>
                             <ul className={s.list}>
-                                {tour.love.map((item, i) => (
-                                    <li key={i}>{item}</li>
+                                {tour.love.map((item) => (
+                                    <li key={item}>{item}</li>
                                 ))}
                             </ul>
                         </section>
 
-                        {tour.descriptionHtml && (
+                        {tour.descriptionHtml ? (
                             <section className={s.expect}>
                                 <h2>What to expect</h2>
                                 <div
@@ -110,13 +153,13 @@ function TourDetailPage() {
                                     dangerouslySetInnerHTML={{__html: tour.descriptionHtml}}
                                 />
                             </section>
-                        )}
+                        ) : null}
 
                         <section>
                             <h2>What&apos;s included</h2>
                             <ul className={`${s.list} ${s.included}`}>
-                                {tour.included.map((item, i) => (
-                                    <li key={i}>{item}</li>
+                                {tour.included.map((item) => (
+                                    <li key={item}>{item}</li>
                                 ))}
                             </ul>
                         </section>
@@ -124,26 +167,26 @@ function TourDetailPage() {
                         <section>
                             <h2>What to remember</h2>
                             <ul className={s.list}>
-                                {tour.remember.map((item, i) => (
-                                    <li key={i}>{item}</li>
+                                {tour.remember.map((item) => (
+                                    <li key={item}>{item}</li>
                                 ))}
                             </ul>
                         </section>
 
-                        {(tour.meeting || tour.address) && (
+                        {tour.meeting || tour.address ? (
                             <section>
                                 <h2>Meeting point</h2>
-                                {tour.meeting && <p>{tour.meeting}</p>}
-                                {tour.address && <p>{tour.address}</p>}
+                                {tour.meeting ? <p>{tour.meeting}</p> : null}
+                                {tour.address ? <p>{tour.address}</p> : null}
                             </section>
-                        )}
+                        ) : null}
 
-                        {tour.cancelPolicy && (
+                        {tour.cancelPolicy ? (
                             <section>
                                 <h2>Cancellation policy</h2>
                                 <p>{tour.cancelPolicy}</p>
                             </section>
-                        )}
+                        ) : null}
 
                         <ReviewsSection tour={tour}/>
                     </main>
@@ -157,13 +200,23 @@ function TourDetailPage() {
     );
 }
 
-export default TourDetailPage;
-
 function shuffle(items) {
     const next = [...items];
-    for (let i = next.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [next[i], next[j]] = [next[j], next[i]];
+
+    for (let index = next.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [next[index], next[randomIndex]] = [next[randomIndex], next[index]];
     }
+
     return next;
 }
+
+function getRatingLabel(rating) {
+    if (rating >= 4.5) return 'Excellent';
+    if (rating >= 4) return 'Great';
+    if (rating >= 3) return 'Average';
+    if (rating >= 2) return 'Poor';
+    return 'Bad';
+}
+
+export default TourDetailPage;

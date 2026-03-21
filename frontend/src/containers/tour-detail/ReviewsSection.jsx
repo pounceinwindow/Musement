@@ -1,6 +1,8 @@
 import s from '../../pages/TourDetailPage.module.css';
 
 function ReviewsSection({tour}) {
+    const ratingLabel = getRatingLabel(tour.rating);
+
     return (
         <section id="reviews">
             <h2>Reviews</h2>
@@ -11,13 +13,13 @@ function ReviewsSection({tour}) {
                         Based on <b>{tour.reviewsCount}</b> verified reviews
                     </p>
                     <div>
-                        <div>Excellent</div>
+                        <div>{ratingLabel}</div>
                         <div className={s.bar}>
                             <span className={s.barFillExcellent}/>
                         </div>
                     </div>
                     <div>
-                        <div>Very good</div>
+                        <div>{getSecondaryLabel(ratingLabel)}</div>
                         <div className={s.bar}>
                             <span className={s.barFillVeryGood}/>
                         </div>
@@ -43,6 +45,18 @@ function ReviewsSection({tour}) {
             </div>
         </section>
     );
+}
+
+function getRatingLabel(rating) {
+    if (rating >= 4.5) return 'Excellent';
+    if (rating >= 4) return 'Great';
+    if (rating >= 3) return 'Average';
+    if (rating >= 2) return 'Poor';
+    return 'Bad';
+}
+
+function getSecondaryLabel(primaryLabel) {
+    return primaryLabel === 'Excellent' ? 'Great' : 'Average';
 }
 
 export default ReviewsSection;

@@ -5,7 +5,7 @@ function Hero() {
         <section className={s.hero}>
             <img alt="" aria-hidden="true" className={s.bg} src="/img/1.avif"/>
             <div className={s.inner}>
-                <div className={s.breadcrumb}>Home > Tours</div>
+                <div className={s.breadcrumb}>Home {'>'} Tours</div>
                 <h1 className={s.title}>Tickets, activities and visits in Tours</h1>
                 <button className={s.datebar} type="button">
                     <svg
