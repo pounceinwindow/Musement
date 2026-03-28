@@ -1,5 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using MusementApi.Models;
 
 namespace MusementApi.Data;
 
@@ -24,10 +26,8 @@ public static class DataSeed
         new("meal", "Meal Included")
     ];
 
-
     private static readonly FilterConfig[] FilterConfigs =
     [
-        
         FilterConfig.Choice(
             "category",
             "Categories",
@@ -56,47 +56,158 @@ public static class DataSeed
             "Tickets option",
             "checkboxes",
             true,
-            TicketOptions,  
-            MatchesTicketOption)
+            TicketOptions,
+            MatchesTicketOption),
+        FilterConfig.Toggle(
+            "freeCancellation",
+            "Free cancellation",
+            static tour => tour.FreeCancellation)
     ];
 
-    private static readonly TourSeed[] Tours = ToursData.Items;
-
-
-    public static object GetTours(IQueryCollection query)
+    public static async Task InitializeAsync(AppDbContext dbContext, CancellationToken cancellationToken = default)
     {
+        if (await dbContext.Tours.AnyAsync(cancellationToken))
+        {
+            return;
+        }
+
+        var tours = ToursData.Items
+            .Select(MapSeedToEntity)
+            .ToArray();
+
+        await dbContext.Tours.AddRangeAsync(tours, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public static async Task<object> GetToursAsync(
+        IQueryable<Tour> source,
+        IQueryCollection query,
+        CancellationToken cancellationToken = default)
+    {
+        var tours = await source
+            .AsNoTracking()
+            .OrderBy(tour => tour.Id)
+            .ToListAsync(cancellationToken);
+
         var filterState = ParseFilters(query);
-        var filteredTours = ApplyFilters(Tours, filterState).ToArray();
+        var filteredTours = ApplyFilters(tours, filterState).ToArray();
 
         return new
         {
             Categories = CategoryTabs,
-            MinPrice = Tours.Min(x => x.PriceFrom),
-            MaxPrice = Tours.Max(x => x.PriceFrom),
+            MinPrice = tours.Count == 0 ? 0m : tours.Min(x => x.PriceFrom),
+            MaxPrice = tours.Count == 0 ? 0m : tours.Max(x => x.PriceFrom),
             TotalCount = filteredTours.Length,
             Applied = BuildAppliedFilters(filterState),
-            Filters = BuildFilterPayload(filterState, filteredTours.Length),
-            Tours = filteredTours.Select(MapTour).ToArray()
+            Filters = BuildFilterPayload(filterState, filteredTours.Length, tours),
+            Tours = filteredTours.Select(ToTourResponse).ToArray()
         };
     }
 
-    public static object GetFilters(IQueryCollection query)
+    public static async Task<object> GetFiltersAsync(
+        IQueryable<Tour> source,
+        IQueryCollection query,
+        CancellationToken cancellationToken = default)
     {
+        var tours = await source
+            .AsNoTracking()
+            .OrderBy(tour => tour.Id)
+            .ToListAsync(cancellationToken);
+
         var filterState = ParseFilters(query);
-        var filteredTours = ApplyFilters(Tours, filterState).ToArray();
+        var filteredTours = ApplyFilters(tours, filterState).ToArray();
 
-        return BuildFilterPayload(filterState, filteredTours.Length);
+        return BuildFilterPayload(filterState, filteredTours.Length, tours);
     }
 
-    public static object? GetTourById(int id)
+    public static async Task<object?> GetTourByIdAsync(
+        IQueryable<Tour> source,
+        int id,
+        CancellationToken cancellationToken = default)
     {
-        var tour = Tours.FirstOrDefault(x => x.Id == id);
-        return tour is null ? null : MapTour(tour);
+        var tour = await source
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        return tour is null ? null : ToTourResponse(tour);
     }
 
-    private static object BuildFilterPayload(FilterState filterState, int totalCount)
+    public static object ToTourResponse(Tour tour)
     {
-        var items = FilterConfigs.Select(filter => BuildFilter(filter, filterState)).ToArray();
+        return new
+        {
+            tour.Id,
+            tour.Slug,
+            tour.Title,
+            tour.Description,
+            tour.HeroUrl,
+            tour.Category,
+            tour.Rating,
+            tour.ReviewsCount,
+            tour.PriceFrom,
+            tour.Duration,
+            tour.Languages,
+            tour.Love,
+            tour.DescriptionHtml,
+            Price = $"${tour.PriceFrom:F2}",
+            tour.FreeCancellation,
+            tour.Chips,
+            tour.Included,
+            Remember = tour.Remember,
+            tour.Meeting,
+            tour.Address,
+            tour.CancelPolicy,
+            Reviews = Array.Empty<object>()
+        };
+    }
+
+    public static void NormalizeTour(Tour tour)
+    {
+        tour.Slug = NormalizeText(tour.Slug);
+        tour.Title = NormalizeText(tour.Title);
+        tour.Description = NormalizeText(tour.Description);
+        tour.HeroUrl = NormalizeText(tour.HeroUrl);
+        tour.Category = NormalizeText(tour.Category);
+        tour.Duration = NormalizeText(tour.Duration);
+        tour.Languages = NormalizeText(tour.Languages);
+        tour.DescriptionHtml = NormalizeText(tour.DescriptionHtml);
+        tour.Meeting = NormalizeText(tour.Meeting);
+        tour.Address = NormalizeText(tour.Address);
+        tour.CancelPolicy = NormalizeText(tour.CancelPolicy);
+        tour.Chips = NormalizeItems(tour.Chips);
+        tour.Love = NormalizeItems(tour.Love);
+        tour.Included = NormalizeItems(tour.Included);
+        tour.Remember = NormalizeItems(tour.Remember);
+    }
+
+    public static void ApplyTourValues(Tour target, Tour source)
+    {
+        NormalizeTour(source);
+
+        target.Slug = source.Slug;
+        target.Title = source.Title;
+        target.Description = source.Description;
+        target.HeroUrl = source.HeroUrl;
+        target.Category = source.Category;
+        target.Rating = source.Rating;
+        target.ReviewsCount = source.ReviewsCount;
+        target.PriceFrom = source.PriceFrom;
+        target.Duration = source.Duration;
+        target.Languages = source.Languages;
+        target.FreeCancellation = source.FreeCancellation;
+        target.Chips = CloneItems(source.Chips);
+        target.Love = CloneItems(source.Love);
+        target.DescriptionHtml = source.DescriptionHtml;
+        target.Included = CloneItems(source.Included);
+        target.Remember = CloneItems(source.Remember);
+        target.Meeting = source.Meeting;
+        target.Address = source.Address;
+        target.CancelPolicy = source.CancelPolicy;
+    }
+
+    private static object BuildFilterPayload(FilterState filterState, int totalCount, IReadOnlyCollection<Tour> tours)
+    {
+        var items = FilterConfigs.Select(filter => BuildFilter(filter, filterState, tours)).ToArray();
 
         return new
         {
@@ -118,42 +229,42 @@ public static class DataSeed
             Options = FilterConfigs
                 .Where(filter => filter.IsChoice)
                 .ToDictionary(
-                filter => filter.Key,
-                filter => filterState.Options[filter.Key],
-                StringComparer.OrdinalIgnoreCase),
+                    filter => filter.Key,
+                    filter => filterState.Options[filter.Key],
+                    StringComparer.OrdinalIgnoreCase),
             Ranges = FilterConfigs
                 .Where(filter => filter.IsRange)
                 .ToDictionary(
-                filter => filter.Key,
-                filter =>
-                {
-                    var selection = filterState.Ranges[filter.Key];
-                    return new { selection.Min, selection.Max };
-                },
-                StringComparer.OrdinalIgnoreCase),
+                    filter => filter.Key,
+                    filter =>
+                    {
+                        var selection = filterState.Ranges[filter.Key];
+                        return new { selection.Min, selection.Max };
+                    },
+                    StringComparer.OrdinalIgnoreCase),
             Toggles = FilterConfigs
                 .Where(filter => filter.IsToggle)
                 .ToDictionary(
-                filter => filter.Key,
-                filter => filterState.Toggles[filter.Key],
-                StringComparer.OrdinalIgnoreCase)
+                    filter => filter.Key,
+                    filter => filterState.Toggles[filter.Key],
+                    StringComparer.OrdinalIgnoreCase)
         };
     }
 
-    private static FilterItemResponse BuildFilter(FilterConfig filter, FilterState filterState)
+    private static FilterItemResponse BuildFilter(FilterConfig filter, FilterState filterState, IReadOnlyCollection<Tour> tours)
     {
         return filter.Type switch
         {
-            "tabs" or "checkboxes" => BuildChoiceFilter(filter, filterState),
-            "range" => BuildRangeFilter(filter, filterState),
-            "toggle" => BuildToggleFilter(filter, filterState),
+            "tabs" or "checkboxes" => BuildChoiceFilter(filter, filterState, tours),
+            "range" => BuildRangeFilter(filter, filterState, tours),
+            "toggle" => BuildToggleFilter(filter, filterState, tours),
             _ => throw new InvalidOperationException($"Unknown filter type: {filter.Type}")
         };
     }
 
-    private static FilterItemResponse BuildChoiceFilter(FilterConfig filter, FilterState filterState)
+    private static FilterItemResponse BuildChoiceFilter(FilterConfig filter, FilterState filterState, IReadOnlyCollection<Tour> tours)
     {
-        var availableTours = ApplyFilters(Tours, filterState, filter.Key).ToArray();
+        var availableTours = ApplyFilters(tours, filterState, filter.Key).ToArray();
         var selectedValues = filterState.Options[filter.Key];
         var items = filter.Options!
             .Select(option => new FilterOptionState(
@@ -172,12 +283,12 @@ public static class DataSeed
             Items: items);
     }
 
-    private static FilterItemResponse BuildRangeFilter(FilterConfig filter, FilterState filterState)
+    private static FilterItemResponse BuildRangeFilter(FilterConfig filter, FilterState filterState, IReadOnlyCollection<Tour> tours)
     {
-        var availableTours = ApplyFilters(Tours, filterState, filter.Key).ToArray();
-        var boundsSource = availableTours.Length == 0 ? Tours : availableTours;
-        var min = boundsSource.Min(filter.SelectValue!);
-        var max = boundsSource.Max(filter.SelectValue!);
+        var availableTours = ApplyFilters(tours, filterState, filter.Key).ToArray();
+        var boundsSource = availableTours.Length == 0 ? tours.ToArray() : availableTours;
+        var min = boundsSource.Length == 0 ? 0m : boundsSource.Min(filter.SelectValue!);
+        var max = boundsSource.Length == 0 ? 0m : boundsSource.Max(filter.SelectValue!);
         var selection = filterState.Ranges[filter.Key];
 
         return new FilterItemResponse(
@@ -194,9 +305,9 @@ public static class DataSeed
             Step: filter.Step);
     }
 
-    private static FilterItemResponse BuildToggleFilter(FilterConfig filter, FilterState filterState)
+    private static FilterItemResponse BuildToggleFilter(FilterConfig filter, FilterState filterState, IReadOnlyCollection<Tour> tours)
     {
-        var availableTours = ApplyFilters(Tours, filterState, filter.Key).ToArray();
+        var availableTours = ApplyFilters(tours, filterState, filter.Key).ToArray();
 
         return new FilterItemResponse(
             filter.Key,
@@ -211,25 +322,25 @@ public static class DataSeed
         var options = FilterConfigs
             .Where(filter => filter.IsChoice)
             .ToDictionary(
-            filter => filter.Key,
-            filter => ParseOptionValues(query, filter.Key, filter.Multi),
-            StringComparer.OrdinalIgnoreCase);
+                filter => filter.Key,
+                filter => ParseOptionValues(query, filter.Key, filter.Multi),
+                StringComparer.OrdinalIgnoreCase);
 
         var ranges = FilterConfigs
             .Where(filter => filter.IsRange)
             .ToDictionary(
-            filter => filter.Key,
-            filter => new RangeSelection(
-                ParseDecimal(query, filter.MinQueryKey!),
-                ParseDecimal(query, filter.MaxQueryKey!)),
-            StringComparer.OrdinalIgnoreCase);
+                filter => filter.Key,
+                filter => new RangeSelection(
+                    ParseDecimal(query, filter.MinQueryKey!),
+                    ParseDecimal(query, filter.MaxQueryKey!)),
+                StringComparer.OrdinalIgnoreCase);
 
         var toggles = FilterConfigs
             .Where(filter => filter.IsToggle)
             .ToDictionary(
-            filter => filter.Key,
-            filter => ParseBool(query, filter.Key),
-            StringComparer.OrdinalIgnoreCase);
+                filter => filter.Key,
+                filter => ParseBool(query, filter.Key),
+                StringComparer.OrdinalIgnoreCase);
 
         return new FilterState(options, ranges, toggles);
     }
@@ -300,7 +411,7 @@ public static class DataSeed
             : null;
     }
 
-    private static IEnumerable<TourSeed> ApplyFilters(IEnumerable<TourSeed> source, FilterState filterState, string? excludedKey = null)
+    private static IEnumerable<Tour> ApplyFilters(IEnumerable<Tour> source, FilterState filterState, string? excludedKey = null)
     {
         var filtered = source;
 
@@ -351,7 +462,7 @@ public static class DataSeed
         return filtered;
     }
 
-    private static bool MatchesTicketOption(TourSeed tour, string optionName)
+    private static bool MatchesTicketOption(Tour tour, string optionName)
     {
         return optionName switch
         {
@@ -366,12 +477,12 @@ public static class DataSeed
         };
     }
 
-    private static bool HasChip(TourSeed tour, string chip)
+    private static bool HasChip(Tour tour, string chip)
     {
         return tour.Chips.Any(x => string.Equals(x, chip, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static bool ContainsTourValue(TourSeed tour, params string[] terms)
+    private static bool ContainsTourValue(Tour tour, params string[] terms)
     {
         return MatchesAny(tour.Title, terms) ||
                MatchesAny(tour.Description, terms) ||
@@ -385,33 +496,51 @@ public static class DataSeed
         return terms.Any(term => value.Contains(term, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static object MapTour(TourSeed tour)
+    private static Tour MapSeedToEntity(TourSeed seed)
     {
-        return new
+        var tour = new Tour
         {
-            tour.Id,
-            tour.Slug,
-            tour.Title,
-            tour.Description,
-            tour.HeroUrl,
-            tour.Category,
-            tour.Rating,
-            tour.ReviewsCount,
-            tour.PriceFrom,
-            tour.Duration,
-            tour.Languages,
-            tour.Love,
-            tour.DescriptionHtml,
-            Price = $"${tour.PriceFrom:F2}",
-            tour.FreeCancellation,
-            tour.Chips,
-            tour.Included,
-            Remember = new[] { tour.RememberFirst, tour.RememberSecond },
-            tour.Meeting,
-            tour.Address,
-            tour.CancelPolicy,
-            Reviews = Array.Empty<object>()
+            Slug = seed.Slug,
+            Title = seed.Title,
+            Description = seed.Description,
+            HeroUrl = seed.HeroUrl,
+            Category = seed.Category,
+            Rating = seed.Rating,
+            ReviewsCount = seed.ReviewsCount,
+            PriceFrom = seed.PriceFrom,
+            Duration = seed.Duration,
+            Languages = seed.Languages,
+            FreeCancellation = seed.FreeCancellation,
+            Chips = CloneItems(seed.Chips),
+            Love = CloneItems(seed.Love),
+            DescriptionHtml = seed.DescriptionHtml,
+            Included = CloneItems(seed.Included),
+            Remember = NormalizeItems([seed.RememberFirst, seed.RememberSecond]),
+            Meeting = seed.Meeting,
+            Address = seed.Address,
+            CancelPolicy = seed.CancelPolicy
         };
+
+        NormalizeTour(tour);
+        return tour;
+    }
+
+    private static string NormalizeText(string? value)
+    {
+        return value?.Trim() ?? string.Empty;
+    }
+
+    private static string[] NormalizeItems(string[]? values)
+    {
+        return values?
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim())
+            .ToArray() ?? Array.Empty<string>();
+    }
+
+    private static string[] CloneItems(string[]? values)
+    {
+        return values?.ToArray() ?? Array.Empty<string>();
     }
 
     private sealed record FilterOptionSeed(string Name, string Label);
@@ -422,13 +551,13 @@ public static class DataSeed
         string Type,
         bool Multi = false,
         FilterOptionSeed[]? Options = null,
-        Func<TourSeed, string, bool>? MatchOption = null,
+        Func<Tour, string, bool>? MatchOption = null,
         string? Format = null,
         string? MinQueryKey = null,
         string? MaxQueryKey = null,
-        Func<TourSeed, decimal>? SelectValue = null,
+        Func<Tour, decimal>? SelectValue = null,
         decimal? Step = null,
-        Func<TourSeed, bool>? MatchToggle = null)
+        Func<Tour, bool>? MatchToggle = null)
     {
         public bool IsChoice => Type is "tabs" or "checkboxes";
         public bool IsRange => string.Equals(Type, "range", StringComparison.OrdinalIgnoreCase);
@@ -440,7 +569,7 @@ public static class DataSeed
             string type,
             bool multi,
             FilterOptionSeed[] options,
-            Func<TourSeed, string, bool> matchOption)
+            Func<Tour, string, bool> matchOption)
         {
             return new(key, label, type, multi, options, matchOption);
         }
@@ -451,13 +580,13 @@ public static class DataSeed
             string format,
             string minQueryKey,
             string maxQueryKey,
-            Func<TourSeed, decimal> selectValue,
+            Func<Tour, decimal> selectValue,
             decimal step)
         {
             return new(key, label, "range", false, null, null, format, minQueryKey, maxQueryKey, selectValue, step);
         }
 
-        public static FilterConfig Toggle(string key, string label, Func<TourSeed, bool> matchToggle)
+        public static FilterConfig Toggle(string key, string label, Func<Tour, bool> matchToggle)
         {
             return new(key, label, "toggle", false, null, null, null, null, null, null, null, matchToggle);
         }
